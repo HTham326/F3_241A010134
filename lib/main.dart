@@ -118,6 +118,17 @@ String _dinhDangNgay(DateTime ngay) {
       return;
     }
     if (!hopLe) return;
+
+    if (_heDaoTao == 'Vừa làm vừa học' && !_buoiDaChon.contains('Tối')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Hệ Vừa làm vừa học bắt buộc chọn buổi Tối',
+          ),
+        ),
+      );
+      return;
+    }
  
     showDialog<void>(
       context: context,

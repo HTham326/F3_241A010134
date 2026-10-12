@@ -41,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
  
   String? _monHoc;                       // giá trị của Dropdown (null = chưa chọn)
   String _heDaoTao = 'Chính quy';        // giá trị của nhóm Radio
+  DateTime? _ngaySinh;                   // giá trị của DatePicker
   final Set<String> _buoiDaChon = {};    // các Checkbox đã tick
   bool _nhanThongBao = true;             // Switch
   double _soTinChi = 15;                 // Slider
@@ -75,6 +76,36 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!RegExp(r'^[\w.\-]+@[\w\-]+\.[\w.\-]+$').hasMatch(s)) return 'Email không đúng định dạng';
     return null;
   }
+
+  Future<void> _chonNgaySinh() async {
+  final homNay = DateTime.now();
+
+  final ngayDuocChon = await showDatePicker(
+    context: context,
+    initialDate: _ngaySinh ?? DateTime(2005, 1, 1),
+    firstDate: DateTime(1900),
+    lastDate: homNay,
+    helpText: 'CHỌN NGÀY SINH',
+    cancelText: 'Hủy',
+    confirmText: 'Đồng ý',
+  );
+
+    if (!mounted) return;
+
+    if (ngayDuocChon != null) {
+      setState(() {
+        _ngaySinh = ngayDuocChon;
+      });
+    }
+  }
+
+String _dinhDangNgay(DateTime ngay) {
+  final d = ngay.day.toString().padLeft(2, '0');
+  final m = ngay.month.toString().padLeft(2, '0');
+  final y = ngay.year.toString();
+
+  return '$d/$m/$y';
+}
  
   void _dangKy() {
     // 1) Kiểm tra các trường của Form
@@ -94,6 +125,7 @@ class _RegisterPageState extends State<RegisterPage> {
         title: const Text('Xác nhận đăng ký'),
         content: Text(
           'Họ tên: ${_hoTenCtrl.text.trim()}\n'
+          'Ngày sinh: ${_ngaySinh == null ? "Chưa chọn" : _dinhDangNgay(_ngaySinh!)}\n'
           'MSSV: ${_mssvCtrl.text.trim()}\n'
           'Email: ${_emailCtrl.text.trim()}\n'
           'Học phần: $_monHoc\n'
@@ -115,6 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _mssvCtrl.clear();
     _emailCtrl.clear();
     setState(() {
+      _ngaySinh = null;
       _monHoc = null;
       _heDaoTao = 'Chính quy';
       _buoiDaChon.clear();
@@ -172,6 +205,25 @@ class _RegisterPageState extends State<RegisterPage> {
                 validator: _kiemTraEmail,
               ),
               const SizedBox(height: 12),
+
+              InkWell(
+                onTap: _chonNgaySinh,
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Ngày sinh',
+                    prefixIcon: Icon(Icons.calendar_today_outlined),
+                    suffixIcon: Icon(Icons.arrow_drop_down),
+                  ),
+                  child: Text(
+                    _ngaySinh == null
+                        ? 'Chọn ngày sinh'
+                        : _dinhDangNgay(_ngaySinh!),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
               DropdownButtonFormField<String>(
                 // initialValue chỉ đặt giá trị lúc khởi tạo; đổi key để ô được dựng lại
                 // khi bấm "Làm lại" (Flutter < 3.35 dùng tham số value thay cho initialValue)
